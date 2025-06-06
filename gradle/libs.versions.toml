@@ -31,6 +31,7 @@ firebaseBom = "33.1.1"
 service = "4.4.2"
 crashlytics = "3.0.2"
 securityCrypto = "1.0.0"
+turbine = "1.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -73,6 +74,8 @@ spotify-auth = { module = "com.spotify.android:auth", version.ref = "spotify-aut
 firebase-bom = {module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom"}
 firebase-crashlytics = {module = "com.google.firebase:firebase-crashlytics-ktx"}
 androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
+cash-turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

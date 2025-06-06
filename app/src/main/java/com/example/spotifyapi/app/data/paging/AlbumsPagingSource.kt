@@ -1,14 +1,14 @@
+package com.example.spotifyapi.app.data.paging
+
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import android.util.Log
 import com.example.spotifyapi.app.data.model.Album
 import com.example.spotifyapi.app.data.repository.AlbumsRepository
 import com.example.spotifyapi.app.domain.mapper.AlbumMapper.toAlbum
 import com.example.spotifyapi.app.domain.mapper.AlbumMapper.toAlbumDB
 
 class AlbumsPagingSource(
-    private val repository: AlbumsRepository,
-    private val artistId: String
+    private val repository: AlbumsRepository, private val artistId: String
 ) : PagingSource<Int, Album>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Album> {
@@ -28,9 +28,7 @@ class AlbumsPagingSource(
 
             val nextKey = if (albums.size < 20) null else offset + 20
             LoadResult.Page(
-                data = albums,
-                prevKey = if (offset == 0) null else offset - 20,
-                nextKey = nextKey
+                data = albums, prevKey = if (offset == 0) null else offset - 20, nextKey = nextKey
             )
         } catch (e: Exception) {
             LoadResult.Error(e)

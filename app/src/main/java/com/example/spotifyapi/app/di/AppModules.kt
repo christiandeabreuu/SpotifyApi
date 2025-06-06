@@ -1,6 +1,6 @@
 package com.example.spotifyapi.app.di
 
-import AlbumsPagingSource
+import com.example.spotifyapi.app.data.paging.AlbumsPagingSource
 import androidx.room.Room
 import com.example.spotifyapi.app.data.database.SpotifyDatabase
 import com.example.spotifyapi.app.data.networking.SpotifyApiService
@@ -36,7 +36,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 val appModules = module {
 
-    viewModel { TopArtistsViewModel(get(), get(), get()) }
+    viewModel { TopArtistsViewModel(get(), get()) }
     viewModel { AlbumsViewModel(get()) }
     viewModel { ProfileViewModel(get(), get()) }
     viewModel { PlaylistViewModel(get(), get(), get()) }
@@ -54,7 +54,7 @@ val appModules = module {
     factory<CreatePlaylistRepository> { CreatePlaylistRepositoryImpl(get(), get()) }
     factory<TopArtistsRepository> { TopArtistsRepositoryImpl(get(), get(), get()) }
 
-    factory { ArtistPagingSource(get(), get()) }
+    factory { ArtistPagingSource(get()) }
     factory { AlbumsPagingSource(get(), get()) }
     factory { TopArtistsAdapter(get()) }
     factory<ResourcesPlugin> { ResourcesPluginImpl(get()) }

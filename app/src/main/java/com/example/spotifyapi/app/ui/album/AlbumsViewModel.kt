@@ -7,10 +7,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.example.spotifyapi.app.data.model.Album
-import com.example.spotifyapi.app.data.repository.AlbumsRepository
+import com.example.spotifyapi.app.domain.usecase.GetAlbumsUseCase
 import kotlinx.coroutines.flow.Flow
 
-class AlbumsViewModel(private val repository: AlbumsRepository) : ViewModel() {
+class AlbumsViewModel(
+    private val getAlbumsUseCase: GetAlbumsUseCase
+) : ViewModel() {
 
     private val _albumsLiveData = MutableLiveData<List<Album>>()
     val albumsLiveData: LiveData<List<Album>> get() = _albumsLiveData
@@ -18,7 +20,7 @@ class AlbumsViewModel(private val repository: AlbumsRepository) : ViewModel() {
     private val _errorLiveData = MutableLiveData<String>()
     val errorLiveData: LiveData<String> get() = _errorLiveData
 
-    suspend fun getAlbumsPagingData(artistId: String): Flow<PagingData<Album>> {
-        return repository.getAlbumsPaged(artistId).flow.cachedIn(viewModelScope)
+    fun getAlbumsPagingData(artistId: String): Flow<PagingData<Album>> {
+        return getAlbumsUseCase.getAlbumsPagingData(artistId).cachedIn(viewModelScope)
     }
 }

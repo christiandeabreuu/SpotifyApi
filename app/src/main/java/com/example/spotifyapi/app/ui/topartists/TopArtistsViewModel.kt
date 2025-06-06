@@ -5,15 +5,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.example.spotifyapi.R
-import com.example.spotifyapi.app.data.database.SpotifyDAO
 import com.example.spotifyapi.app.data.model.ArtistResponse
 import com.example.spotifyapi.app.data.model.UserProfile
-import com.example.spotifyapi.app.data.paging.ArtistPagingSource
 import com.example.spotifyapi.app.domain.usecase.GetTopArtistsUseCase
 import com.example.spotifyapi.app.domain.usecase.GetUserProfileUseCase
 import com.example.spotifyapi.utils.Constants.MEDIUM_TERM
@@ -24,7 +20,6 @@ import kotlinx.coroutines.launch
 class TopArtistsViewModel(
     private val userProfileUseCase: GetUserProfileUseCase,
     private val useCaseTopArtists: GetTopArtistsUseCase,
-    private val spotifyDAO: SpotifyDAO
 ) : ViewModel() {
 
     private val _userProfileLiveData = MutableLiveData<UserProfile?>()
@@ -33,12 +28,8 @@ class TopArtistsViewModel(
     private val _errorLiveData = MutableLiveData<String>()
     val errorLiveData: LiveData<String> get() = _errorLiveData
 
-    fun getArtistsPagingData(): Flow<PagingData<ArtistResponse>> {
-        return Pager(
-            config = PagingConfig(pageSize = 20, enablePlaceholders = false),
-            pagingSourceFactory = { ArtistPagingSource(useCaseTopArtists, spotifyDAO) }
-        ).flow.cachedIn(viewModelScope)
-    }
+    fun getArtistsPagingData(): Flow<PagingData<ArtistResponse>> =
+        useCaseTopArtists.getTopArtistsPagingData().cachedIn(viewModelScope)
 
     fun getUserProfile() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -56,7 +47,7 @@ class TopArtistsViewModel(
             try {
                 useCaseTopArtists.preloadAllTopArtists(timeRange)
             } catch (e: Exception) {
-                Log.e("TopArtistsViewModel", "preloadOfflineArtists: ${e.message}")
+                Log.d("TopArtistsViewModel", "Erro ao pré-carregar artistas offline: ${e.message}")
             }
         }
     }

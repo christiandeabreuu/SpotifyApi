@@ -10,5 +10,5 @@ interface AlbumsRepository {
     suspend fun getAlbumsFromApi(artistId: String, offset: Int): AlbumsResponse?
     suspend fun getAlbumsFromDB(artistId: String): List<AlbumDB>
     suspend fun insertLocalAlbums(albums: List<AlbumDB>)
-    suspend fun getAlbumsPaged(artistId: String): Pager<Int, Album>
+    fun getAlbumsPaged(artistId: String): Pager<Int, Album>
 }

@@ -1,64 +1,52 @@
 package com.example.spotifyapi.app.domain.usecase
 
-import com.example.spotifyapi.app.data.local.AlbumDB
+import androidx.paging.PagingData
+import com.example.spotifyapi.app.data.model.Album
 import com.example.spotifyapi.app.data.repository.AlbumsRepository
-import com.example.spotifyapi.app.domain.mapper.AlbumMapper.toAlbum
+import io.mockk.MockKAnnotations
 import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
+@ExperimentalCoroutinesApi
 class GetAlbumsUseCaseTest {
 
+    @MockK
+    private lateinit var repository: AlbumsRepository
+
     private lateinit var useCase: GetAlbumsUseCase
-    private val repository: AlbumsRepository = mockk(relaxed = true)
 
     @Before
-    fun setup() {
+    fun setUp() {
+        MockKAnnotations.init(this)
         useCase = GetAlbumsUseCase(repository)
     }
 
-    // 🔹 Teste quando há álbuns no banco de dados
     @Test
-    fun `execute should return albums from database when available`() = runBlocking {
-        //Given
-        val fakeAlbumsDb = listOf(
-            AlbumDB(
-                "databaseId",
-                "name",
-                "artistId",
-                "imageUrl",
-                "releaseDate",
-            )
+    fun `getAlbumsPagingData deve retornar os albums corretamente`() = runTest {
+        // Dados fictícios
+        val fakeAlbums = listOf(
+            Album(id = "1", name = "Album A", "release_date", emptyList(), "artist123"),
+            Album(id = "2", name = "Album B", "", emptyList(), "artist1234"),
         )
-        val fakeAlbums = fakeAlbumsDb.map { it.toAlbum() }
-        coEvery { repository.getAlbumsFromDB(any()) } returns fakeAlbumsDb
 
-        //When
-        val result = useCase.loadAlbums("token123")
+        // Criando um fluxo de paginação com os dados fictícios
+        val pagingData: Flow<PagingData<Album>> = flowOf(PagingData.from(fakeAlbums))
 
-        //Then
-        assertEquals(fakeAlbums, result) // 🔹 Agora a comparação será entre objetos do mesmo tipo
-        coVerify(exactly = 1) { repository.getAlbumsFromDB("artist123") }
-    }
+        // Mockando a chamada do repositório
+        coEvery { repository.getAlbumsPaged("test_artist_id").flow } returns pagingData
 
+        // Chamando o método do UseCase
+        val result = useCase.getAlbumsPagingData("test_artist_id")
 
-    @Test
-    fun `execute should return empty list when API and database have no albums`() = runBlocking {
-        // Given
-        coEvery { repository.getAlbumsFromDB(any()) } returns emptyList()
-        coEvery { repository.getAlbumsFromApi(any()) } returns null
-
-        // When
-        val result = useCase.loadAlbums("token123")
-
-        // Then - Teste quando API e banco de dados estão vazios
-        assertTrue(result.isEmpty())
-        coVerify(exactly = 1) { repository.getAlbumsFromDB("artist123") }
-        coVerify(exactly = 1) { repository.getAlbumsFromApi("token123") }
+        // Verificando se o fluxo produzido é o esperado
+        assertEquals(pagingData, result)
     }
 }

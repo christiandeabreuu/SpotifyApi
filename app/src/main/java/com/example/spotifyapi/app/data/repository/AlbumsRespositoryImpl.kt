@@ -1,6 +1,5 @@
 package com.example.spotifyapi.app.data.repository
 
-import AlbumsPagingSource
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import com.example.spotifyapi.app.data.database.SpotifyDAO
@@ -8,6 +7,7 @@ import com.example.spotifyapi.app.data.local.AlbumDB
 import com.example.spotifyapi.app.data.model.Album
 import com.example.spotifyapi.app.data.model.AlbumsResponse
 import com.example.spotifyapi.app.data.networking.SpotifyApiService
+import com.example.spotifyapi.app.data.paging.AlbumsPagingSource
 import com.example.spotifyapi.auth.data.repository.TokenRepository
 import com.example.spotifyapi.utils.addBearer
 
@@ -43,7 +43,7 @@ class AlbumsRepositoryImpl(
         spotifyDAO.insertLocalAlbums(albums)
     }
 
-    override suspend fun getAlbumsPaged(artistId: String): Pager<Int, Album> {
+    override fun getAlbumsPaged(artistId: String): Pager<Int, Album> {
         return Pager(config = PagingConfig(pageSize = 20, enablePlaceholders = false),
             pagingSourceFactory = { AlbumsPagingSource(this, artistId) })
     }

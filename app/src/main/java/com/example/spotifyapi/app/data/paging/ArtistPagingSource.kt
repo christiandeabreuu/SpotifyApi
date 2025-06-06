@@ -2,16 +2,13 @@ package com.example.spotifyapi.app.data.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.example.spotifyapi.app.data.database.SpotifyDAO
-import com.example.spotifyapi.app.data.local.ArtistDB
 import com.example.spotifyapi.app.data.model.ArtistResponse
 import com.example.spotifyapi.app.data.model.ImageArtistResponse
 import com.example.spotifyapi.app.domain.usecase.GetTopArtistsUseCase
 import com.example.spotifyapi.utils.Constants.MEDIUM_TERM
 
 class ArtistPagingSource(
-    private val useCaseTopArtists: GetTopArtistsUseCase,
-    private val spotifyDAO: SpotifyDAO,
+    private val useCaseTopArtists: GetTopArtistsUseCase
 ) : PagingSource<Int, ArtistResponse>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, ArtistResponse> {
@@ -31,14 +28,15 @@ class ArtistPagingSource(
             }
 
             val finalResponse = response.ifEmpty {
-                getFromDBWithOffsetAndLimit(20, nextPageNumber, MEDIUM_TERM).map { artist ->
-                    ArtistResponse(
-                        id = artist.id,
-                        name = artist.name,
-                        popularity = artist.popularity,
-                        images = listOf(ImageArtistResponse(url = artist.imageUrl))
-                    )
-                }
+                useCaseTopArtists.getTopArtistsFromDB(20, nextPageNumber, MEDIUM_TERM)
+                    .map { artist ->
+                        ArtistResponse(
+                            id = artist.id,
+                            name = artist.name,
+                            popularity = artist.popularity,
+                            images = listOf(ImageArtistResponse(url = artist.imageUrl))
+                        )
+                    }
             }
 
             LoadResult.Page(
@@ -56,13 +54,5 @@ class ArtistPagingSource(
             val anchorPage = state.closestPageToPosition(anchorPosition)
             anchorPage?.prevKey?.plus(20) ?: anchorPage?.nextKey?.minus(20)
         }
-    }
-
-    private suspend fun getFromDBWithOffsetAndLimit(
-        limit: Int,
-        offset: Int,
-        timeRange: String
-    ): List<ArtistDB> {
-        return spotifyDAO.getTopArtistsWithOffsetAndLimit(limit, offset, timeRange)
     }
 }
